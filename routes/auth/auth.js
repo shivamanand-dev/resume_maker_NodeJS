@@ -43,6 +43,7 @@ router.post(
         password: hashedPassword,
       });
 
+      //   create jwt token
       const data = {
         user: {
           id: user.id,
@@ -52,6 +53,60 @@ router.post(
       const authToken = jwt.sign(data, JWT_Secret);
 
       res.json({ user, authToken });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send({ message: "Server error occur" });
+    }
+  }
+);
+
+router.post(
+  "/login",
+  [body("password", "Password must be min 6 char").isLength({ min: 6 })],
+  async (req, res) => {
+    try {
+      //   Handle Validators
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      //   Destructure request body
+      const { username, password } = req.body;
+
+      //   Find User
+      let user = await User.findOne({ username }).select("+password");
+
+      //   If no User
+      if (!user) {
+        return res.status(400).json({
+          success: success,
+          error: "sorry, login with correct credentials",
+        });
+      }
+
+      //   Compare Pass
+      const comparePass = await bcrypt.compare(password, user.password);
+
+      if (!comparePass) {
+        return res.status(400).json({
+          success: success,
+          error: "sorry, login with correct credentials",
+        });
+      }
+
+      //   create jwt token
+      const data = {
+        user: {
+          id: user.id,
+        },
+      };
+
+      const authToken = jwt.sign(data, JWT_Secret);
+
+      let userDetails = await User.findOne({ username });
+
+      res.json({ userDetails, authToken });
     } catch (error) {
       console.error(error);
       res.status(500).send({ message: "Server error occur" });
