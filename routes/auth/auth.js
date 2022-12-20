@@ -80,7 +80,6 @@ router.post(
       //   If no User
       if (!user) {
         return res.status(400).json({
-          success: success,
           error: "sorry, login with correct credentials",
         });
       }
@@ -89,7 +88,7 @@ router.post(
       const comparePass = await bcrypt.compare(password, user.password);
 
       if (!comparePass) {
-        return res.status(400).json({
+        return res.status(401).json({
           success: success,
           error: "sorry, login with correct credentials",
         });
