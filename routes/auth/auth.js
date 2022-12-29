@@ -4,7 +4,7 @@ const { body, validationResult } = require("express-validator");
 const User = require("../../models/auth/User");
 const bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
-const JWT_Secret = process.env.JWT_Secret;
+const JWT_SECRET = process.env.JWT_SECRET;
 
 router.post(
   "/signup",
@@ -50,7 +50,7 @@ router.post(
         },
       };
 
-      const authToken = jwt.sign(data, JWT_Secret);
+      const authToken = jwt.sign(data, JWT_SECRET);
 
       res.json({ user, authToken });
     } catch (error) {
@@ -101,7 +101,7 @@ router.post(
         },
       };
 
-      const authToken = jwt.sign(data, JWT_Secret);
+      const authToken = jwt.sign(data, JWT_SECRET);
 
       let userDetails = await User.findOne({ username });
 
