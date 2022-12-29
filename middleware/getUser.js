@@ -10,7 +10,6 @@ function getUser(req, res, next) {
 
   const data = jwt.verify(token, JWT_SECRET);
 
-  //   console.log(req.user);
   req.user = data.user;
 
   next();

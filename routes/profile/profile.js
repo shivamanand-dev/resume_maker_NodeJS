@@ -3,11 +3,17 @@ const getUser = require("../../middleware/getUser");
 const router = express.Router();
 const User = require("../../models/auth/User");
 
-router.put("/update", getUser, (req, res) => {
+router.put("/update", getUser, async (req, res) => {
   try {
-    const { country } = req.body;
+    const { liveCountry, name } = req.body;
 
-    return res.send(country);
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { name, liveCountry },
+      { returnDocument: "after" }
+    );
+
+    return res.send(user);
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Server error occur" });
