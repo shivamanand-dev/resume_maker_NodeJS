@@ -15,12 +15,13 @@ router.post(
   ],
   async (req, res) => {
     try {
-      const { name, email, username, password } = req.body;
+      let success = false;
+      const { name, email, username, password, profilePic } = req.body;
 
       //   Handle Validators
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({ success, errors: errors.array() });
       }
 
       //   Find user with same userName and email
@@ -28,7 +29,7 @@ router.post(
       let availUsername = await User.findOne({ username: username });
 
       if (user || availUsername) {
-        return res.status(400).json({ message: "Already Exists" });
+        return res.status(400).json({ success, message: "Already Exists" });
       }
 
       //   Hash Password
@@ -52,7 +53,9 @@ router.post(
 
       const authToken = jwt.sign(data, JWT_SECRET);
 
-      res.json({ user, authToken });
+      success = true;
+      // console.log(req.body.profilePic);
+      res.json({ success, user, authToken });
     } catch (error) {
       console.error(error);
       res.status(500).send({ message: "Server error occur" });
@@ -65,6 +68,7 @@ router.post(
   [body("password", "Password must be min 6 char").isLength({ min: 6 })],
   async (req, res) => {
     try {
+      let success = false;
       //   Handle Validators
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -80,7 +84,8 @@ router.post(
       //   If no User
       if (!user) {
         return res.status(400).json({
-          error: "sorry, login with correct credentials",
+          success: success,
+          message: "sorry, login with correct credentials",
         });
       }
 
@@ -105,10 +110,11 @@ router.post(
 
       let userDetails = await User.findOne({ username });
 
-      res.json({ userDetails, authToken });
+      success = true;
+      res.status(200).json({ success: success, userDetails, authToken });
     } catch (error) {
       console.error(error);
-      res.status(500).send({ message: "Server error occur" });
+      res.status(500).send({ success: false, message: "Server error occur" });
     }
   }
 );
