@@ -54,7 +54,7 @@ router.post(
       const authToken = jwt.sign(data, JWT_SECRET);
 
       success = true;
-      // console.log(req.body.profilePic);
+      console.log(req.body.profilePic);
       res.json({ success, user, authToken });
     } catch (error) {
       console.error(error);
