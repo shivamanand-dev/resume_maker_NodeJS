@@ -16,7 +16,7 @@ router.post(
   async (req, res) => {
     try {
       let success = false;
-      const { name, email, username, password, profilePic } = req.body;
+      const { name, email, username, password, profileImageUrl } = req.body;
 
       //   Handle Validators
       const errors = validationResult(req);
@@ -42,6 +42,7 @@ router.post(
         email,
         username,
         password: hashedPassword,
+        profileImageUrl,
       });
 
       //   create jwt token
@@ -54,7 +55,6 @@ router.post(
       const authToken = jwt.sign(data, JWT_SECRET);
 
       success = true;
-      console.log(req.body.profilePic);
       res.json({ success, user, authToken });
     } catch (error) {
       console.error(error);
