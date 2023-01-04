@@ -6,8 +6,8 @@ const randomBytes = promisify(crypto.randomBytes);
 
 dotenv.config();
 
-const region = "Asia Pacific (Tokyo) ap-northeast-1";
-const bucketName = "resume-maker";
+const region = process.env.AWS_REGION;
+const bucketName = process.env.AWS_BUCKET_NAME;
 const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 
