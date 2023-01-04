@@ -4,7 +4,7 @@ const { body, validationResult } = require("express-validator");
 const User = require("../../models/auth/User");
 const bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
-const JWT_Secret = process.env.JWT_Secret;
+const JWT_SECRET = process.env.JWT_SECRET;
 
 router.post(
   "/signup",
@@ -15,12 +15,13 @@ router.post(
   ],
   async (req, res) => {
     try {
-      const { name, email, username, password } = req.body;
+      let success = false;
+      const { name, email, username, password, profileImageUrl } = req.body;
 
       //   Handle Validators
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({ success, errors: errors.array() });
       }
 
       //   Find user with same userName and email
@@ -28,7 +29,7 @@ router.post(
       let availUsername = await User.findOne({ username: username });
 
       if (user || availUsername) {
-        return res.status(400).json({ message: "Already Exists" });
+        return res.status(400).json({ success, message: "Already Exists" });
       }
 
       //   Hash Password
@@ -41,6 +42,7 @@ router.post(
         email,
         username,
         password: hashedPassword,
+        profileImageUrl,
       });
 
       //   create jwt token
@@ -50,9 +52,10 @@ router.post(
         },
       };
 
-      const authToken = jwt.sign(data, JWT_Secret);
+      const authToken = jwt.sign(data, JWT_SECRET);
 
-      res.json({ user, authToken });
+      success = true;
+      res.json({ success, user, authToken });
     } catch (error) {
       console.error(error);
       res.status(500).send({ message: "Server error occur" });
@@ -65,6 +68,7 @@ router.post(
   [body("password", "Password must be min 6 char").isLength({ min: 6 })],
   async (req, res) => {
     try {
+      let success = false;
       //   Handle Validators
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -81,7 +85,7 @@ router.post(
       if (!user) {
         return res.status(400).json({
           success: success,
-          error: "sorry, login with correct credentials",
+          message: "sorry, login with correct credentials",
         });
       }
 
@@ -89,7 +93,7 @@ router.post(
       const comparePass = await bcrypt.compare(password, user.password);
 
       if (!comparePass) {
-        return res.status(400).json({
+        return res.status(401).json({
           success: success,
           error: "sorry, login with correct credentials",
         });
@@ -102,14 +106,15 @@ router.post(
         },
       };
 
-      const authToken = jwt.sign(data, JWT_Secret);
+      const authToken = jwt.sign(data, JWT_SECRET);
 
       let userDetails = await User.findOne({ username });
 
-      res.json({ userDetails, authToken });
+      success = true;
+      res.status(200).json({ success: success, userDetails, authToken });
     } catch (error) {
       console.error(error);
-      res.status(500).send({ message: "Server error occur" });
+      res.status(500).send({ success: false, message: "Server error occur" });
     }
   }
 );

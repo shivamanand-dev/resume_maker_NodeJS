@@ -29,6 +29,14 @@ const UserSchema = new Schema({
     type: Array,
     default: [],
   },
+  liveCountry: {
+    type: String,
+    default: "",
+  },
+  profileImageUrl: {
+    type: String,
+    default: "",
+  },
 });
 
 module.exports = mongoose.model("user", UserSchema);
