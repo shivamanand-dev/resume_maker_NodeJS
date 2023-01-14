@@ -4,6 +4,7 @@ const { body, validationResult } = require("express-validator");
 const User = require("../../models/auth/User");
 const bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
+const deEncryptAll = require("../../services/deEncrypt");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 router.post(
@@ -75,8 +76,11 @@ router.post(
         return res.status(400).json({ errors: errors.array() });
       }
 
+      // Dencrypt Coming Data
+      const deEncryptedDetails = deEncryptAll(req.body);
+
       //   Destructure request body
-      const { username, password } = req.body;
+      const { username, password } = deEncryptedDetails;
 
       //   Find User
       let user = await User.findOne({ username }).select("+password");
