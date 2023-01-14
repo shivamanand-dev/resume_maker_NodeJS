@@ -6,11 +6,11 @@ const generateUploadURL = require("../../s3");
 
 router.put("/update", getUser, async (req, res) => {
   try {
-    const { liveCountry, name } = req.body;
+    const { liveCountry, name, profileImageUrl } = req.body;
 
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { name, liveCountry },
+      { name, liveCountry, profileImageUrl },
       { returnDocument: "after" }
     );
 
