@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
+const deEncryptUserDetails = require("../../middleware/deEncryptUserDetails");
 const User = require("../../models/auth/User");
 const bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
@@ -9,6 +10,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 router.post(
   "/signup",
+  deEncryptUserDetails,
   [
     body("email", "Enter correct email").isEmail(),
     body("username", "Username must be min 3 char").isLength({ min: 3 }),
@@ -17,9 +19,10 @@ router.post(
   async (req, res) => {
     try {
       let success = false;
+
       const { name, email, username, password, profileImageUrl } = req.body;
 
-      //   Handle Validators
+      // Handle Validators
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({ success, errors: errors.array() });
