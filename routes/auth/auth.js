@@ -67,63 +67,54 @@ router.post(
   }
 );
 
-router.post(
-  "/login",
-  [body("password", "Password must be min 6 char").isLength({ min: 6 })],
-  async (req, res) => {
-    try {
-      let success = false;
-      //   Handle Validators
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
+router.post("/login", async (req, res) => {
+  try {
+    let success = false;
 
-      // Dencrypt Coming Data
-      const deEncryptedDetails = deEncryptAll(req.body);
+    // Dencrypt Coming Data
+    const deEncryptedDetails = deEncryptAll(req.body);
 
-      //   Destructure request body
-      const { username, password } = deEncryptedDetails;
+    //   Destructure request body
+    const { username, password } = deEncryptedDetails;
 
-      //   Find User
-      let user = await User.findOne({ username }).select("+password");
+    //   Find User
+    let user = await User.findOne({ username }).select("+password");
 
-      //   If no User
-      if (!user) {
-        return res.status(400).json({
-          success: success,
-          message: "sorry, login with correct credentials",
-        });
-      }
-
-      //   Compare Pass
-      const comparePass = await bcrypt.compare(password, user.password);
-
-      if (!comparePass) {
-        return res.status(401).json({
-          success: success,
-          error: "sorry, login with correct credentials",
-        });
-      }
-
-      //   create jwt token
-      const data = {
-        user: {
-          id: user.id,
-        },
-      };
-
-      const authToken = jwt.sign(data, JWT_SECRET);
-
-      let userDetails = await User.findOne({ username });
-
-      success = true;
-      res.status(200).json({ success: success, userDetails, authToken });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send({ success: false, message: "Server error occur" });
+    //   If no User
+    if (!user) {
+      return res.status(400).json({
+        success: success,
+        message: "sorry, login with correct credentials",
+      });
     }
+
+    //   Compare Pass
+    const comparePass = await bcrypt.compare(password, user.password);
+
+    if (!comparePass) {
+      return res.status(401).json({
+        success: success,
+        error: "sorry, login with correct credentials",
+      });
+    }
+
+    //   create jwt token
+    const data = {
+      user: {
+        id: user.id,
+      },
+    };
+
+    const authToken = jwt.sign(data, JWT_SECRET);
+
+    let userDetails = await User.findOne({ username });
+
+    success = true;
+    res.status(200).json({ success: success, userDetails, authToken });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ success: false, message: "Server error occur" });
   }
-);
+});
 
 module.exports = router;
